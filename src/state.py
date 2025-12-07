@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import List,Optional
 from .rpc import *
 from .config import *
@@ -16,7 +16,7 @@ class StableState:
         state_pth = os.path.join(DATAPTH,f"{ServerId}_log_state.json")
         with open(state_pth,'w',encoding='utf-8') as sf:
             data = {
-                "log": self.log
+                "log": [asdict(l) for l in self.log]
             }
             
             json.dump(data,sf)
@@ -46,14 +46,14 @@ class ServerState:
 
 @dataclass
 class LeaderState:
-    nextIndex: List[int]
-    matchIndex: List[int]
+    nextIndex: dict[int,int]
+    matchIndex: dict[int,int]
     
 @dataclass
 class State:
     stable: StableState
     server: ServerState
-    LeaderState: Optional[LeaderState]
+    leader: Optional[LeaderState]
     
     def getCurrentTerm(self)->int:
         return self.stable.currentTerm
