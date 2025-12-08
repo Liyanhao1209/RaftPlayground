@@ -9,10 +9,6 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QGraphicsScene, QGraphic
 from PyQt5.QtCore import Qt, QTimer, QRectF, QPointF
 from PyQt5.QtGui import QPainter, QPen, QBrush, QColor, QFont
 
-# ==========================================
-# 1. 配置与常量
-# ==========================================
-
 NUM_SERVERS = 5
 RPC_TIMEOUT = 50000.0
 MIN_RPC_LATENCY = 10000.0
@@ -20,7 +16,6 @@ MAX_RPC_LATENCY = 15000.0
 ELECTION_TIMEOUT = 100000.0
 BATCH_SIZE = 1
 
-# 配色方案 (对应原版 termColors)
 TERM_COLORS = ['#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3', '#a6d854', '#ffd92f']
 
 def make_election_alarm(now):
@@ -29,10 +24,6 @@ def make_election_alarm(now):
 def circle_coord(frac, cx, cy, r):
     radians = 2 * math.pi * (0.75 + frac)
     return {'x': cx + r * math.cos(radians), 'y': cy + r * math.sin(radians)}
-
-# ==========================================
-# 2. 核心数据模型
-# ==========================================
 
 class MessageType(Enum):
     RequestVote = "RequestVote"
@@ -122,10 +113,6 @@ class RaftModel:
         m.messages = [msg.clone() for msg in self.messages]
         return m
 
-# ==========================================
-# 3. 核心逻辑 (Raft Logic)
-# ==========================================
-
 def log_term(log, index):
     if index < 1 or index > len(log): return 0
     return log[index - 1].term
@@ -145,7 +132,6 @@ def send_message(model, msg):
 # --- Rules ---
 
 def rules_start_new_election(model, server):
-    # 如果超时，或者是 Follower/Candidate 且时间到了
     if (server.state in [ServerState.Follower, ServerState.Candidate] and 
         server.election_alarm <= model.time):
         server.election_alarm = make_election_alarm(model.time)
@@ -336,10 +322,6 @@ def action_timeout(model, server):
 def action_client_request(model, server):
     if server.state == ServerState.Leader:
         server.log.append(LogEntry(server.term, 'v'))
-
-# ==========================================
-# 4. 界面实现 (PyQt5)
-# ==========================================
 
 class ServerItem(QGraphicsItem):
     def __init__(self, server_id, total_servers, action_callback):
